@@ -1,1 +1,21 @@
+newmodel=Sequential()
+newmodel.add(LSTM (units=50 , return_sequences=True ,input_shape = (x_train.shape[1],1)))
+newmodel.add(Dropout(0.2))
+newmodel.add(LSTM (units=50 , return_sequences=True))
+newmodel.add(Dropout(0.2))
+newmodel.add(LSTM (units=50 , return_sequences=True))
+newmodel.add(Dropout(0.2))
+newmodel.add(LSTM (units=50 ))
+newmodel.add(Dropout(0.2))
+newmodel.add(Dense(units = 1))
+newmodel.compile(optimizer='adam' ,loss='mean_squared_error')
+
+dataset_total=pd.concat(( rates_frame['close'] , rates_frame1['close']) , axis=0 )
+dataset_total=rates_frame['close']
+dataset_total = dataset_total[len(dataset_total)-60: len(dataset_total)].to_numpy()
+
+
+inputs=dataset_total
+inputs=inputs.reshape(-1,1)
+dataset_total
 
