@@ -1,1 +1,208 @@
 
+
+market_price=pd.read_csv('C:/Users/Administrator/Desktop/AREEB files/project/ForexProject/ForexMarkets.csv')
+market_price=market_price['price']
+market_price
+
+
+# In[ ]:
+
+
+
+
+
+# In[3]:
+
+
+#l=3548
+
+#market_price=market_price[0:l]
+
+market_price=market_price.values.tolist()
+#market_price[3547]
+
+
+# In[ ]:
+
+
+#I=3596
+#pri=market_price[I:]
+#len(pri)
+
+
+# In[4]:
+
+
+
+def prepare_data(timeseries,features):
+    X,y=[],[]
+    for i in range(len(timeseries)):
+        endix=i+features
+        if endix> len(timeseries)-1:
+            break
+        
+        
+        seq_x,seq_y=timeseries[i:endix],timeseries[endix]
+        X.append(seq_x)
+        y.append(seq_y)
+    return np.array(X),np.array(y)
+
+
+
+
+
+
+timeseries=market_price  #listdata
+n_steps=48
+
+X,y=prepare_data(timeseries,n_steps)
+#print(X,y)
+X.shape
+
+
+features=1
+X=X.reshape((X.shape[0],X.shape[1],features))
+
+
+
+
+#artificial RNN
+
+
+model=Sequential()
+model.add(LSTM(50,activation='relu',return_sequences=True,input_shape=(n_steps,features)))
+model.add(LSTM(50, activation='relu'))
+model.add(Dense(1))
+
+model.compile(optimizer='adam',loss='mse')
+
+model.fit(X,y,epochs=100,verbose=1)
+
+
+
+
+
+# In[5]:
+
+
+test=pd.read_csv('C:/Users/Administrator/Desktop/Dataaa.csv')
+test=test['price']
+test=test.values.tolist()
+test
+
+
+# In[6]:
+
+
+x_input=np.array(test)  
+temp_input=list(x_input)
+lst_output=[]
+i=0
+while(i<48):
+    
+    if(len(temp_input)>48):
+        x_input=np.array(temp_input[1:])
+        x_input=x_input.reshape((1,n_steps,features))
+        ymod=model.predict(x_input,verbose=0)
+        temp_input.append(ymod[0][0])
+        temp_input=temp_input[1:]
+        lst_output.append(ymod[0][0])
+        i=i+1
+    else:
+        x_input=x_input.reshape((1,n_steps,features))
+        ymod=model.predict(x_input,verbose=0)
+        temp_input.append(ymod[0][0])
+        lst_output.append(ymod[0][0])
+        i=i+1
+
+#print(lst_output)
+
+
+
+predicted_market = pd.DataFrame((lst_output),columns=['Prediction'])
+predicted_market
+
+
+# In[ ]:
+
+
+
+
+
+# In[7]:
+
+
+
+#test
+
+#test_phase=pd.read_csv('C:/Users/Administrator/Desktop/Dataa.csv')
+#test_phase=test_phase['price']
+
+#test=test_phase.values.tolist()
+
+
+
+
+#predict
+
+
+#print(lst_output)
+
+
+
+#predicted_market = pd.DataFrame((lst_output),columns=['Prediction'])
+#predicted_market
+
+
+
+
+days=pd.read_csv('C:/Users/Administrator/Desktop/AREEB files/project/ForexProject/Timezone.csv')
+predicted_data = pd.concat([days,predicted_market], axis=1)
+predicted1=pd.DataFrame(predicted_data)
+predicted1
+
+
+actual_data=pd.read_csv('C:/Users/Administrator/Desktop/actual.csv')
+actual_dt=pd.DataFrame(actual_data, columns=['price'])
+actual_dt
+
+
+
+
+new=pd.concat([predicted1,actual_dt],axis=1)
+new
+
+
+# In[8]:
+
+
+
+plot_data = [
+    go.Scatter(
+        x=predicted1.Time,
+        y=new.price,
+        name='actual'
+    ),
+ 
+]
+
+plot_layout = go.Layout(
+        title='Actual Forex market'
+    )
+fig = go.Figure(data=plot_data, layout=plot_layout)
+pyoff.iplot(fig)
+
+
+plot_data = [
+    go.Scatter(
+        x=predicted1.Time,
+        y=new.Prediction,
+        name='prediction'
+    ),
+]
+plot_layout = go.Layout(
+        title='Predicted Forex market'
+    )
+fig = go.Figure(data=plot_data, layout=plot_layout)
+pyoff.iplot(fig)
+
