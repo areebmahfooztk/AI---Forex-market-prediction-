@@ -1,1 +1,30 @@
 
+
+model=Sequential()
+model.add(LSTM(50,activation='relu',return_sequences=True,input_shape=(n_steps,n_features)))
+model.add(LSTM(50, activation='relu'))
+model.add(Dense(1))
+
+model.compile(optimizer='adam',loss='mse')
+
+model.fit(X,y,epochs=100,verbose=1)
+
+
+# In[ ]:
+
+
+#from array import array 
+n=50
+test=df[-n:]
+test
+
+
+# In[ ]:
+
+
+
+
+x_input=np.array(test)   
+temp_input=list(x_input)
+lst_output=[]
+i=0
